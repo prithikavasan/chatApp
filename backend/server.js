@@ -106,10 +106,21 @@ app.get('/api/health', (req, res) => {
     2: 'connecting',
     3: 'disconnecting',
   };
+  
+  let files = [];
+  try {
+    const fs = require('fs');
+    files = fs.readdirSync(process.cwd());
+  } catch (err) {
+    files = [err.message];
+  }
+  
   res.status(200).json({
     status: dbState === 1 ? 'healthy' : 'unhealthy',
     database: states[dbState] || 'unknown',
     error: global.dbConnectionError || null,
+    cwd: process.cwd(),
+    files,
     timestamp: new Date(),
   });
 });
