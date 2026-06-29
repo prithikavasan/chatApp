@@ -109,6 +109,7 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: dbState === 1 ? 'healthy' : 'unhealthy',
     database: states[dbState] || 'unknown',
+    error: global.dbConnectionError || null,
     timestamp: new Date(),
   });
 });
