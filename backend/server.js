@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
+const mongoose = require('mongoose');
 
 const connectDB = require('./config/db');
 const { notFound, errorHandler } = require('./middlewares/errorMiddleware');
@@ -96,9 +97,20 @@ app.use('/api/conversations', conversationRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/notifications', notificationRoutes);
 
-// Test Endpoint
+// Test Endpoint with DB state diagnostics
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'healthy', timestamp: new Date() });
+  const dbState = mongoose.connection.readyState;
+  const states = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting',
+  };
+  res.status(200).json({
+    status: dbState === 1 ? 'healthy' : 'unhealthy',
+    database: states[dbState] || 'unknown',
+    timestamp: new Date(),
+  });
 });
 
 // 404 & Global Error Handler Middlewares
