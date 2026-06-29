@@ -3,9 +3,15 @@ const mongoose = require('mongoose');
 // Store DB connection error globally for diagnostic API checks
 global.dbConnectionError = null;
 
+const fallbackUri = 'mongodb+srv://prithikavasan512_db_user:chatApp@cluster0.ol3iezt.mongodb.net/chatcode?retryWrites=true&w=majority';
+
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/chatcode');
+    const dbUri = process.env.MONGODB_URI && process.env.MONGODB_URI.trim() !== ''
+      ? process.env.MONGODB_URI 
+      : fallbackUri;
+
+    const conn = await mongoose.connect(dbUri);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     global.dbConnectionError = null;
   } catch (error) {
