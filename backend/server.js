@@ -37,22 +37,34 @@ app.use(helmet({
   crossOriginResourcePolicy: false, // Allows media resource sharing
 }));
 
+// Diagnostics on boot (helps troubleshoot Render dashboards)
+console.log('--- Configuration Diagnostics ---');
+console.log(`- NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+console.log(`- PORT: ${process.env.PORT || 5000}`);
+console.log(`- MONGODB_URI: ${process.env.MONGODB_URI ? 'LOADED' : 'NOT CONFIGURED (Will fallback to local)'}`);
+console.log(`- CLIENT_URL: ${process.env.CLIENT_URL || 'NOT CONFIGURED'}`);
+console.log(`- CLOUDINARY_CLOUD_NAME: ${process.env.CLOUDINARY_CLOUD_NAME ? 'LOADED' : 'NOT CONFIGURED'}`);
+console.log('---------------------------------');
+
+// Normalize origins to prevent trailing slash configuration typos
 const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   process.env.CLIENT_URL,
-].filter(Boolean);
+].filter(Boolean).map(url => url.replace(/\/$/, ''));
 
 app.use(cors({
   origin: (origin, callback) => {
-    // allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
+    
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    
+    if (allowedOrigins.indexOf(normalizedOrigin) === -1) {
       // In development, allow any origin if CLIENT_URL is not set
-      if (process.env.NODE_ENV !== 'production') {
+      if (process.env.NODE_ENV !== 'production' && !process.env.CLIENT_URL) {
         return callback(null, true);
       }
-      return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
+      return callback(null, false); // Rejects CORS without throwing a 500 server crash error
     }
     return callback(null, true);
   },
