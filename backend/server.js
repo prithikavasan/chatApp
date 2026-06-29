@@ -35,6 +35,7 @@ app.use(compression());
 // Security Middlewares
 app.use(helmet({
   crossOriginResourcePolicy: false, // Allows media resource sharing
+  contentSecurityPolicy: false,     // Prevents CSP headers from blocking websocket protocols
 }));
 
 // Diagnostics on boot (helps troubleshoot Render dashboards)
@@ -46,10 +47,11 @@ console.log(`- CLIENT_URL: ${process.env.CLIENT_URL || 'NOT CONFIGURED'}`);
 console.log(`- CLOUDINARY_CLOUD_NAME: ${process.env.CLOUDINARY_CLOUD_NAME ? 'LOADED' : 'NOT CONFIGURED'}`);
 console.log('---------------------------------');
 
-// Normalize origins to prevent trailing slash configuration typos
+// Normalize origins to prevent trailing slash configuration typos (includes hardcoded fallback for Vercel production client URL)
 const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
+  'https://client-livid-seven-78.vercel.app',
   process.env.CLIENT_URL,
 ].filter(Boolean).map(url => url.replace(/\/$/, ''));
 
