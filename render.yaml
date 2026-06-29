@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: chatcode-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false # User must paste their MongoDB Atlas Connection URI on Render Dashboard
+      - key: JWT_SECRET
+        generateValue: true # Generates a random secure secret automatically
+      - key: CLIENT_URL
+        sync: false # User must paste their Vercel Frontend URL on Render Dashboard (e.g. https://chatcode.vercel.app)
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false # Cloudinary credentials
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
